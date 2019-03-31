@@ -1,3 +1,9 @@
-import time
+from pytz import timezone
+from datetime import datetime
 
-print(time.localtime(),'demo python')
+cst_tz = timezone('Asia/Shanghai')
+utc_tz = timezone('UTC')
+utcnow = datetime.utcnow()
+utcnow = utcnow.replace(tzinfo=utc_tz)
+china = utcnow.astimezone(cst_tz)
+print(china,'python demo.py')
