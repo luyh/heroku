@@ -27,6 +27,7 @@ try:
     smtpObj.connect( mail_host, 25 )  # 25 为 SMTP 端口号
     smtpObj.login( mail_user, mail_pass )
     smtpObj.sendmail( sender, receivers, message.as_string() )
+    print('email sent')
     print("邮件发送成功")
 
 except smtplib.SMTPException:
