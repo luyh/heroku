@@ -1,3 +1,1 @@
-
-
-tes: python send_email.py
+test: python send_email.py
