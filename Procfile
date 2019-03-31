@@ -1,1 +1,1 @@
-test: python send_email.py
+worker: python send_email.py
