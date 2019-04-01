@@ -5,21 +5,21 @@ import smtplib
 from email.mime.text import MIMEText
 from email.header import Header
 import os
+from china_time import getChinaTime
 
 # 第三方 SMTP 服务
 mail_host = "smtp.qq.com"  # 设置服务器
-mail_user = "461587276@qq.com"  # 用户名
+mail_user = os.environ.get('MAIL_USER') # 用户名
 mail_pass = os.environ.get('MAIL_PASS')
-print(mail_pass)
 
-sender = '461587276@qq.com'
-receivers = ['461587276@qq.com']  # 接收邮件，可设置为你的QQ邮箱或者其他邮箱
+sender = mail_user
+receivers = [mail_user]  # 接收邮件，可设置为你的QQ邮箱或者其他邮箱
 
-message = MIMEText( 'Python 邮件发送测试...', 'plain', 'utf-8' )
-message['From'] = Header( "菜鸟教程", 'utf-8' )
+message = MIMEText( getChinaTime()+'\n Heroku Python 邮件发送测试...', 'plain', 'utf-8' )
+message['From'] = Header( "fast-retreat-53401.herokuapp", 'utf-8' )
 message['To'] = Header( "测试", 'utf-8' )
 
-subject = 'Python SMTP 邮件测试'
+subject = 'Heroku Python SMTP 邮件测试'
 message['Subject'] = Header( subject, 'utf-8' )
 
 try:
