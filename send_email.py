@@ -7,28 +7,31 @@ from email.header import Header
 import os
 from china_time import getChinaTime
 
-# 第三方 SMTP 服务
-mail_host = "smtp.qq.com"  # 设置服务器
-mail_user = os.environ.get('MAIL_USER') # 用户名
-mail_pass = os.environ.get('MAIL_PASS')
+def send_email(title="fast-retreat-53401.herokuapp",content="msg"):
+    # 第三方 SMTP 服务
+    mail_host = "smtp.qq.com"  # 设置服务器
+    mail_user = os.environ.get('MAIL_USER') # 用户名
+    mail_pass = os.environ.get('MAIL_PASS')
 
-sender = mail_user
-receivers = [mail_user]  # 接收邮件，可设置为你的QQ邮箱或者其他邮箱
+    sender = mail_user
+    receivers = [mail_user]  # 接收邮件，可设置为你的QQ邮箱或者其他邮箱
 
-message = MIMEText( getChinaTime()+'\n Heroku Python 邮件发送测试...', 'plain', 'utf-8' )
-message['From'] = Header( "fast-retreat-53401.herokuapp", 'utf-8' )
-message['To'] = Header( "测试", 'utf-8' )
+    message = MIMEText( content+'\n Heroku Python 邮件发送测试...\n'+getChinaTime(), 'plain', 'utf-8' )
+    message['From'] = Header( title, 'utf-8' )
+    message['To'] = Header( "测试", 'utf-8' )
 
-subject = 'Heroku Python SMTP 邮件测试'
-message['Subject'] = Header( subject, 'utf-8' )
+    subject = 'Heroku Python SMTP 邮件测试'
+    message['Subject'] = Header( subject, 'utf-8' )
 
-try:
-    smtpObj = smtplib.SMTP()
-    smtpObj.connect( mail_host, 25 )  # 25 为 SMTP 端口号
-    smtpObj.login( mail_user, mail_pass )
-    smtpObj.sendmail( sender, receivers, message.as_string() )
-    print('email sent')
-    print("邮件发送成功")
+    try:
+        smtpObj = smtplib.SMTP()
+        smtpObj.connect( mail_host, 25 )  # 25 为 SMTP 端口号
+        smtpObj.login( mail_user, mail_pass )
+        smtpObj.sendmail( sender, receivers, message.as_string() )
+        print(getChinaTime()+' 邮件发送成功')
 
-except smtplib.SMTPException:
-    print("Error: 无法发送邮件")
+    except smtplib.SMTPException:
+        print(getChinaTime()+" Error: 无法发送邮件")
+
+if __name__ == '__main__':
+    send_email(title='测试邮件标题',content='测试邮件内容')
