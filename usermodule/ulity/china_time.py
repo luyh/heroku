@@ -17,6 +17,6 @@ class ChinaTime():
 if __name__ == '__main__':
     chinatime = ChinaTime()
     time = chinatime.getChinaTime()
-    print(time)
-    print(chinatime.day)
-    print(chinatime.time)
+    print( '获取中国时间：',time)
+    print('获取日期：',chinatime.day)
+    print('获取时间：',chinatime.time)
