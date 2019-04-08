@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import requests
-from usermodule.ulity.china_time import ChinaTime
+from ulity.china_time import ChinaTime
 
 def send_wechat(title,content):
     now = ChinaTime().getChinaTime()

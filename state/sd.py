@@ -1,6 +1,6 @@
 import time
 from hpg import HPG
-from zkb import ZKB
+from hpg.zkb import ZKB
 
 
 if __name__ == '__main__':

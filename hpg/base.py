@@ -1,4 +1,4 @@
-import chrome
+from chrome2 import chrome
 import time
 
 class BASE(object):
@@ -7,7 +7,7 @@ class BASE(object):
         self.toBuy_url = None
         self.status = None
         self.receive_btn_xpath = None
-        self.driver =chrome.chrome()
+        self.driver = chrome.chrome()
 
     def login(self):
         pass

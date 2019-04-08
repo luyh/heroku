@@ -1,8 +1,9 @@
 from selenium.webdriver.common.action_chains import ActionChains
-from base import BASE
+from hpg.base import BASE
 import os
 import time
-import chrome
+from chrome2 import chrome
+
 
 class ZKB(BASE):
     def __init__(self):

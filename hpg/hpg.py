@@ -1,10 +1,11 @@
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.chrome.options import Options
-from base import BASE
+from hpg.base import BASE
 import os
 import time
-import chrome
+from chrome2 import chrome
+
 
 class HPG(BASE):
     def __init__(self):
