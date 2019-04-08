@@ -5,9 +5,11 @@ import smtplib
 from email.mime.text import MIMEText
 from email.header import Header
 import os
-from china_time import ChinaTime
+from usermodule.ulity.china_time import ChinaTime
+import markdown
 
-def send_email(title="fast-retreat-53401.herokuapp",content="msg"):
+def send_email(title="fast-retreat-53401.herokuapp", \
+               content="msg", content_type = "plain"):
     # 第三方 SMTP 服务
     mail_host = "smtp.qq.com"  # 设置服务器
     mail_user = os.environ.get('MAIL_USER') # 用户名
@@ -17,9 +19,10 @@ def send_email(title="fast-retreat-53401.herokuapp",content="msg"):
     receivers = [mail_user]  # 接收邮件，可设置为你的QQ邮箱或者其他邮箱
 
     now = ChinaTime().getChinaTime()
-    message = MIMEText( content+'\n \
-                        Heroku Python 邮件发送测试...\n'+now,\
-                        'plain', 'utf-8' )
+    text = content+'\n Heroku Python 邮件发送测试...\n'+now
+    if type == 'html':
+        text = markdown.markdown(text)
+    message = MIMEText( text,content_type, 'utf-8' )
     message['From'] = Header( title, 'utf-8' )
     message['To'] = Header( "测试", 'utf-8' )
 
