@@ -10,23 +10,22 @@ import _thread
 systerm = sys.platform
 print( '系统类型:', systerm )
 
+mobileEmulation = {'deviceName': 'iPhone 4'}
+options = webdriver.ChromeOptions()
+options.add_experimental_option('mobileEmulation', mobileEmulation)
 
 def chrome():
     # 连接Chrome
-
-    mobileEmulation = {'deviceName': 'iPhone 4'}
-    options = webdriver.ChromeOptions()
-    options.add_experimental_option( 'mobileEmulation', mobileEmulation )
-
     print( u'正在连接chrome浏览器...' )
     if systerm.startswith( 'darwin' ):
 
-        driver = driver = webdriver.Chrome(executable_path='/Users/Hebbelu/Downloads/chromedriver',\
+        driver = webdriver.Chrome(executable_path='/Users/Hebbelu/Downloads/chromedriver',\
                                            chrome_options=options)
-
-
-    elif systerm.starstwith( 'linux' ):
+    elif systerm.startswith( 'linux' ):
         driver = webdriver.Chrome(chrome_options=options)
+
+    elif systerm.startswith('win32'):
+        driver = webdriver.Chrome(executable_path='.\chromedriver.exe',chrome_options=options)
 
     time.sleep( 3 )
     print( u'已打开chrome浏览器，并成功连接' )
@@ -53,6 +52,7 @@ def new_window(driver):
 
 if __name__ == '__main__':
     driver = chrome()
+    driver.set_window_size(500, 500)
     driver.get('http://www.baidu.com')
     time.sleep(5)
     start_refresh_thread(driver)
