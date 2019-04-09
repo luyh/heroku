@@ -12,9 +12,25 @@ class BASE(object):
     def login(self):
         pass
 
+    def _get(self,url,num = 5):
+        i = 0
+        if i <num:
+            self.driver.get(url)
+            if self.driver.title == "hpg.sqk2.cn":
+                print('第{}次尝试打开网页:{}没打开'.format(i,url))
+                self.driver.refresh()
+                time.sleep(3)
+                self._get(url,i+1)
+            else:
+                print('已打开网页：{}，标题：{}'.format(url,self.driver.title))
+                return True
+        else:
+            print('尝试{}次没打开网页：{}'.format(num,url))
+            return False
+
     def toBuy(self):
         print( '切换到我要买页面' )
-        self.driver.get( self.toBuy_url )
+        self._get( self.toBuy_url )
         time.sleep(3)
 
     def queue_task(self):

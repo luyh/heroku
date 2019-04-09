@@ -8,22 +8,35 @@ import state
 @acts_as_state_machine
 class HPG(BASE,state.StateMachine):
     initialHPG = State(initial=True)
-    hpgChrome = connectChrome('hpg')
+    hpgChrome = connectChrome(name='hpg')
     hpgChromeConnected = hpgChrome.sucessConnectedToChrome
     hpgLogined = State()
+    hpgSubscribedTask = State()
+    hpgWaitingTask = State()
+    hpgReceiveingTask = State()
 
     hpgChromeEvent = Event( from_states=initialHPG,
                                 to_state= hpgChromeConnected)
     hpgLoginEvent = Event( from_states=hpgChromeConnected,
                            to_state= hpgLogined)
+    hpgSubscribeTaskEvent = Event( from_states=hpgLogined,
+                           to_state= hpgSubscribedTask)
+    hpgInitWaitingTaskEvent = Event( from_states=hpgSubscribedTask,
+                           to_state= hpgWaitingTask)
+    hpgKeepWaitingTaskEvent = Event( from_states=hpgWaitingTask,
+                           to_state= hpgWaitingTask)
+    hpgReceiveTaskEvent = Event( from_states=hpgWaitingTask,
+                           to_state= hpgReceiveingTask)
 
 
     def __init__(self,debug = False):
         self.login_url = 'http://hpg.sqk2.cn/public/apprentice.php/passport/login.html'
         self.toBuy_url= 'http://hpg.sqk2.cn/public/apprentice.php/task/index.html'
         self.receive_btn_xpath = '//*[@id="operation"]/a[2]'
+        self.receiveButton = None
         self.username = os.environ.get( 'HPG_USER' )  # 用户名
         self.password = os.environ.get( 'HPG_PASS' )  #
+
         self.driver = None
         self.debug = debug
 
@@ -35,6 +48,7 @@ class HPG(BASE,state.StateMachine):
         self.hpgChrome.start()
         if self.hpgChrome.connected:
             self.driver = self.hpgChrome.driver
+            self.driver.set_window_size(50, 1000)
 
     @after('hpgChromeEvent')
     def toLogin(self):
@@ -42,9 +56,9 @@ class HPG(BASE,state.StateMachine):
 
     @before('hpgLoginEvent')
     def login(self):
-        print( '登陆hpg：{}'.format(self.login) )
-        self.driver.get( self.login_url )
-        print( self.driver.title )
+        print( '登陆hpg：{}'.format(self.login_url) )
+        self._get( self.login_url )
+
 
         # 输入用户名及密码
         print( '输入用户名及密码...' )
@@ -63,12 +77,12 @@ class HPG(BASE,state.StateMachine):
         print( '已登陆HPG，完成初始化操作' )
 
     @after('hpgLoginEvent')
-    def toBuy(self):
-        #TODO:准备去接任务
-        print('准备去接任务')
+    def toBuyEvent(self):
+        self.transition(self.hpgSubscribeTaskEvent,'hpgSubscribeTaskEvent')
 
-
+    @before('hpgSubscribeTaskEvent')
     def queue_task(self):
+        self.toBuy()
         try:
             normal_task = self.driver.find_element_by_id('normal-task')
             normal_task.click()
@@ -79,25 +93,38 @@ class HPG(BASE,state.StateMachine):
         except:
             print('没找到我要买按钮')
 
+    @after('hpgSubscribeTaskEvent')
+    def waitTaskEvent(self):
+        self.transition(self.hpgInitWaitingTaskEvent,'hpgInitWaitingTaskEvent')
 
+    @before('hpgInitWaitingTaskEvent')
+    @before('hpgKeepWaitingTaskEvent')
     def wait_task(self):
         self.driver.refresh()
         time.sleep( 3 )
-
         try:
-            #recieveBut 定位错
-            receiveBut = self.driver.find_element_by_xpath(self.receive_btn_xpath)
-            print('点击领取按钮')
-            print(receiveBut.text)
-            receiveBut.click()
+            self.receiveButton = self.driver.find_element_by_xpath(self.receive_btn_xpath)
         except:
+            self.receiveButton = None
             print('没找到领取按钮')
 
-        def check_status(self):
-            pass
+    @after('hpgInitWaitingTaskEvent')
+    @after('hpgKeepWaitingTaskEvent')
+    def checkTask(self):
+        if self.receiveButton == None:
+            self.transition(self.hpgKeepWaitingTaskEvent,'hpgKeepWaitingTaskEvent')
+        else:
+            self.transition(self.hpgReceiveTaskEvent, 'hpgReceiveTaskEvent')
 
-        def run(self):
-            pass
+    @before('hpgReceiveTaskEvent')
+    def receiveTask(self):
+        print('点击领取按钮')
+        self.receiveButton.click()
+        time.sleep(3)
+
+    @after('hpgReceiveTaskEvent')
+    def anotherEvent(self):
+        pass
 
 if __name__ == '__main__':
     hpg = HPG(debug= True)

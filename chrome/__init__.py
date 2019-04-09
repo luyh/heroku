@@ -23,11 +23,13 @@ class connectChrome(state.StateMachine):
     newChromeEvent = Event( from_states=tryedConnectChrome, to_state= sucessConnectedToChrome)
     reloadChromeEvent = Event( from_states=tryedConnectChrome, to_state= sucessConnectedToChrome)
 
-    def __init__(self,name = 'chrome'):
+    def __init__(self,name = 'chrome',mobileEmulation = None,emobileEmulationFlag = False):
         self.name = name
         self.driver = None
         self.connected = False
         self.debug = False
+        self.mobileEmulation = mobileEmulation
+        self.emobileEmulationFlag = emobileEmulationFlag
         print('新建连接chrome:{}'.format(name))
 
 
@@ -55,9 +57,6 @@ class connectChrome(state.StateMachine):
         except FileNotFoundError:
             print('没找到：{}.data文件".format(self.name)')
 
-
-
-
     @after( 'tryConnectChromeEvent' )
     def checkConnect(self):
         if self.connected == True:
@@ -75,9 +74,9 @@ class connectChrome(state.StateMachine):
 
     @before('newChromeEvent')
     def newChrome(self):
-        mobileEmulation = {'deviceName': 'iPhone X'}
         options = webdriver.ChromeOptions()
-        options.add_experimental_option( 'mobileEmulation', mobileEmulation )
+        if self.emobileEmulationFlag:
+            options.add_experimental_option( 'mobileEmulation', self.mobileEmulation )
 
         # 连接Chrome
         print(u'正在连接chrome浏览器...')
@@ -90,7 +89,6 @@ class connectChrome(state.StateMachine):
 
         elif systerm.startswith('win32'):
             driver = webdriver.Chrome(executable_path='C:/Users/Administrator/fast-retreat-53401/chrome/chromedriver.exe', chrome_options=options)
-        driver.set_window_size( 50, 1200 )
         time.sleep(3)
 
         print(u'已打开chrome浏览器，并成功连接')
