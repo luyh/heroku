@@ -27,6 +27,7 @@ class connectChrome(state.StateMachine):
         self.name = name
         self.driver = None
         self.connected = False
+        self.debug = False
         print('新建连接chrome:{}'.format(name))
 
 
@@ -115,6 +116,7 @@ class connectChrome(state.StateMachine):
 
 if __name__ == '__main__':
     connect_chrome = connectChrome(name='hpg')
+    #connect_chrome.debug = True
     connect_chrome.start()
     if connect_chrome.connected == True:
         driver = connect_chrome.getChrome()

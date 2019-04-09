@@ -1,13 +1,15 @@
 from state_machine import State, Event, acts_as_state_machine, after, before, InvalidStateTransition
 
 class StateMachine():
+    def __init__(self):
+        self.debug = False
     def transition(self, event,name='event'):
         try:
-            self.print_before_state()
+            if self.debug :self.print_before_state()
             #print('transition from {} to {}'.format(event.from_states, event.to_state))
-            print('执行事件：{}'.format(name))
+            if self.debug:print('执行事件：{}'.format(name))
             event()
-            self.print_after_state(name)
+            if self.debug:self.print_after_state(name)
         except InvalidStateTransition as err:
             #print('Error: transition from {} to {} failed'.format(event.from_states, event.to_state))
             pass
