@@ -1,7 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from state_machine import State, Event, acts_as_state_machine, after, before, InvalidStateTransition
-import mywebdriver
+from chrome import mywebdriver
 from selenium.common.exceptions import WebDriverException
 import state
 import pickle
@@ -89,8 +89,8 @@ class connectChrome(state.StateMachine):
             driver = webdriver.Chrome(chrome_options=options)
 
         elif systerm.startswith('win32'):
-            driver = webdriver.Chrome(executable_path='.\chromedriver.exe', chrome_options=options)
-        driver.set_window_size( 50, 800 )
+            driver = webdriver.Chrome(executable_path='C:/Users/Administrator/fast-retreat-53401/chrome/chromedriver.exe', chrome_options=options)
+        driver.set_window_size( 50, 1200 )
         time.sleep(3)
 
         print(u'已打开chrome浏览器，并成功连接')
@@ -111,15 +111,13 @@ class connectChrome(state.StateMachine):
     def finish_newChrome(self):
         print('已新建chrome:{},等待连接外部事件'.format(self.name))
 
-    def getChrome(self):
-        return self.driver
 
 if __name__ == '__main__':
     connect_chrome = connectChrome(name='hpg')
     #connect_chrome.debug = True
     connect_chrome.start()
     if connect_chrome.connected == True:
-        driver = connect_chrome.getChrome()
+        driver = connect_chrome.driver
         url = 'http://www.baidu.com'
         print('打开百度:{}'.format(url))
         driver.get(url)

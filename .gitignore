@@ -3,3 +3,4 @@
 usermodule/ulity/__pycache__/
 __pycache__/
 *.date
+*.data

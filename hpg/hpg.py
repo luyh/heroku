@@ -1,13 +1,23 @@
-from selenium import webdriver
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.chrome.options import Options
+from state_machine import State, Event, acts_as_state_machine, after, before, InvalidStateTransition
 from hpg.base import BASE
+from chrome import connectChrome
 import os
 import time
-from chrome2 import chrome
+import state
+
+@acts_as_state_machine
+class HPG(BASE,state.StateMachine):
+    initialHPG = State(initial=True)
+    chrome = connectChrome()
+    hpgChromeConnected = chrome.sucessConnectedToChrome
+    hpgLogined = State()
+
+    hpgChromeEvent = Event( from_states=initialHPG,
+                                to_state= hpgChromeConnected)
+    hpgLoginEvent = Event( from_states=hpgChromeConnected,
+                           to_state= hpgLogined)
 
 
-class HPG(BASE):
     def __init__(self):
         self.login_url = 'http://hpg.sqk2.cn/public/apprentice.php/passport/login.html'
         self.toBuy_url= 'http://hpg.sqk2.cn/public/apprentice.php/task/index.html'
@@ -16,15 +26,17 @@ class HPG(BASE):
         self.password = os.environ.get( 'HPG_PASS' )  #
         self.driver = None
 
+    @before('hpgChromeEvent')
     def new_chrome(self):
-        self.driver = chrome.chrome()
+        self.chrome.start()
+        if self.chrome.connected:
+            self.driver = self.chrome.driver
 
-    def connect_chrome(self,port):
-        chrome_options = Options()
-        chrome_options.add_experimental_option("debuggerAddress", "127.0.0.1:{}".format(port))
-        # driver就是当前浏览器窗口
-        driver = webdriver.Chrome(chrome_options=chrome_options)
+    @after('hpgChromeEvent')
+    def toLogin(self):
+        self.transition(self.hpgToBuyEvent,'hpgLoginEvent')
 
+    @before('hpgLoginEvent')
     def login(self):
         print( '打开hpg' )
         self.driver.get( self.login_url )
@@ -36,7 +48,6 @@ class HPG(BASE):
         username_element.clear()
         username_element.send_keys( self.username )
 
-
         password_element = self.driver.find_element_by_id( 'password' )
         password_element.clear()
         password_element.send_keys( self.password )
@@ -46,6 +57,11 @@ class HPG(BASE):
         login_element.click()
         time.sleep( 2 )
         print( '已登陆HPG，完成初始化操作' )
+
+    @after('hpgLoginEvent')
+    def toBuy(self):
+        #TODO:准备去接任务
+        print('准备去接任务')
 
 
     def queue_task(self):
