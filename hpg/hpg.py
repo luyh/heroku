@@ -1,5 +1,5 @@
 from state_machine import State, Event, acts_as_state_machine, after, before, InvalidStateTransition
-from hpg.base import BASE
+from base import BASE
 from chrome import connectChrome
 import os
 import time
@@ -8,8 +8,8 @@ import state
 @acts_as_state_machine
 class HPG(BASE,state.StateMachine):
     initialHPG = State(initial=True)
-    chrome = connectChrome()
-    hpgChromeConnected = chrome.sucessConnectedToChrome
+    hpgChrome = connectChrome('hpg')
+    hpgChromeConnected = hpgChrome.sucessConnectedToChrome
     hpgLogined = State()
 
     hpgChromeEvent = Event( from_states=initialHPG,
@@ -18,27 +18,31 @@ class HPG(BASE,state.StateMachine):
                            to_state= hpgLogined)
 
 
-    def __init__(self):
+    def __init__(self,debug = False):
         self.login_url = 'http://hpg.sqk2.cn/public/apprentice.php/passport/login.html'
         self.toBuy_url= 'http://hpg.sqk2.cn/public/apprentice.php/task/index.html'
         self.receive_btn_xpath = '//*[@id="operation"]/a[2]'
         self.username = os.environ.get( 'HPG_USER' )  # 用户名
         self.password = os.environ.get( 'HPG_PASS' )  #
         self.driver = None
+        self.debug = debug
+
+    def start(self):
+        self.transition(self.hpgChromeEvent,'hpgChromeEvent')
 
     @before('hpgChromeEvent')
     def new_chrome(self):
-        self.chrome.start()
-        if self.chrome.connected:
-            self.driver = self.chrome.driver
+        self.hpgChrome.start()
+        if self.hpgChrome.connected:
+            self.driver = self.hpgChrome.driver
 
     @after('hpgChromeEvent')
     def toLogin(self):
-        self.transition(self.hpgToBuyEvent,'hpgLoginEvent')
+        self.transition(self.hpgLoginEvent,'hpgLoginEvent')
 
     @before('hpgLoginEvent')
     def login(self):
-        print( '打开hpg' )
+        print( '登陆hpg：{}'.format(self.login) )
         self.driver.get( self.login_url )
         print( self.driver.title )
 
@@ -85,8 +89,7 @@ class HPG(BASE,state.StateMachine):
             receiveBut = self.driver.find_element_by_xpath(self.receive_btn_xpath)
             print('点击领取按钮')
             print(receiveBut.text)
-            ActionChains(self.driver).click(receiveBut).perform()
-            self.status = 'receive_task'
+            receiveBut.click()
         except:
             print('没找到领取按钮')
 
@@ -97,4 +100,5 @@ class HPG(BASE,state.StateMachine):
             pass
 
 if __name__ == '__main__':
-    hpg = HPG()
+    hpg = HPG(debug= True)
+    hpg.start()

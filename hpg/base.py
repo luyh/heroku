@@ -1,4 +1,4 @@
-from chrome2 import chrome
+from selenium import webdriver
 import time
 
 class BASE(object):
@@ -7,7 +7,7 @@ class BASE(object):
         self.toBuy_url = None
         self.status = None
         self.receive_btn_xpath = None
-        self.driver = chrome.chrome()
+        self.driver = None
 
     def login(self):
         pass
@@ -16,7 +16,6 @@ class BASE(object):
         print( '切换到我要买页面' )
         self.driver.get( self.toBuy_url )
         time.sleep(3)
-        self.status = 'quere_task'
 
     def queue_task(self):
         pass
@@ -31,4 +30,4 @@ class BASE(object):
         pass
 
     def start_refresh_thread(self):
-        chrome.start_refresh_thread( self.driver, delay=30 )
+        pass
