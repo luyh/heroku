@@ -5,6 +5,12 @@ from demo import mywebdriver
 from selenium.common.exceptions import WebDriverException
 import state
 import pickle
+import sys
+import time
+
+# 打印系统系统
+systerm = sys.platform
+print( '系统类型:', systerm )
 
 @acts_as_state_machine
 class connectChrome(state.StateMachine):
@@ -72,10 +78,21 @@ class connectChrome(state.StateMachine):
         options = webdriver.ChromeOptions()
         options.add_experimental_option( 'mobileEmulation', mobileEmulation )
 
-        driver = webdriver.Chrome( executable_path='/Users/Hebbelu/Downloads/chromedriver', \
-                                   chrome_options=options )
+        # 连接Chrome
+        print(u'正在连接chrome浏览器...')
+        if systerm.startswith('darwin'):
 
+            driver = webdriver.Chrome(executable_path='/Users/Hebbelu/Downloads/chromedriver', \
+                                      chrome_options=options)
+        elif systerm.startswith('linux'):
+            driver = webdriver.Chrome(chrome_options=options)
+
+        elif systerm.startswith('win32'):
+            driver = webdriver.Chrome(executable_path='.\chromedriver.exe', chrome_options=options)
         driver.set_window_size( 50, 800 )
+        time.sleep(3)
+
+        print(u'已打开chrome浏览器，并成功连接')
         self.driver = driver
 
         params = {}

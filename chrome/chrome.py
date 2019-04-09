@@ -49,7 +49,6 @@ def new_window(driver):
     driver.execute_script(js)
 
 
-
 if __name__ == '__main__':
     driver = chrome()
     driver.set_window_size(500, 500)
