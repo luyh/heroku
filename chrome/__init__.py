@@ -1,7 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from state_machine import State, Event, acts_as_state_machine, after, before, InvalidStateTransition
-from demo import mywebdriver
+import mywebdriver
 from selenium.common.exceptions import WebDriverException
 import state
 import pickle
