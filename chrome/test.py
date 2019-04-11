@@ -19,12 +19,3 @@ def stop_reflash_thread(driver):
     js = js='window.open();'
     driver.execute_script(js)
 
-
-if __name__ == '__main__':
-    driver = chrome()
-    driver.set_window_size(500, 500)
-    driver.get('http://www.baidu.com')
-    time.sleep(5)
-    start_refresh_thread(driver)
-    time.sleep(5)
-    driver.quit()

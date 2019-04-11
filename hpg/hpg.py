@@ -1,9 +1,14 @@
 from state_machine import State, Event, acts_as_state_machine, after, before, InvalidStateTransition
 from base import BASE
+import sys
+sys.path.append('..')
 from chrome import connectChrome
+from ulity import china_time,send_wechat,send_email
 import os
 import time
 import state
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.common.exceptions import TimeoutException
 
 @acts_as_state_machine
 class HPG(BASE,state.StateMachine):
@@ -14,12 +19,18 @@ class HPG(BASE,state.StateMachine):
     hpgSubscribedTask = State()
     hpgWaitingTask = State()
     hpgReceiveingTask = State()
+    hpgReceivedTask = State()
+    hpgWaitingSubmitTask = State()
+    hpgCheckedTask = State()
 
     hpgChromeEvent = Event( from_states=initialHPG,
                                 to_state= hpgChromeConnected)
     hpgLoginEvent = Event( from_states=hpgChromeConnected,
                            to_state= hpgLogined)
-    hpgSubscribeTaskEvent = Event( from_states=hpgLogined,
+    hpgCheckingTaskEvent = Event( from_states= (hpgLoginEvent,),
+                           to_state= hpgCheckedTask)
+
+    hpgSubscribeTaskEvent = Event( from_states=hpgCheckedTask,
                            to_state= hpgSubscribedTask)
     hpgInitWaitingTaskEvent = Event( from_states=hpgSubscribedTask,
                            to_state= hpgWaitingTask)
@@ -27,16 +38,20 @@ class HPG(BASE,state.StateMachine):
                            to_state= hpgWaitingTask)
     hpgReceiveTaskEvent = Event( from_states=hpgWaitingTask,
                            to_state= hpgReceiveingTask)
+    hpgSubmitTaskEvent = Event( from_states=(hpgWaitingTask,hpgReceiveingTask),
+                           to_state= hpgWaitingSubmitTask)
+
 
 
     def __init__(self,debug = False):
         self.login_url = 'http://hpg.sqk2.cn/public/apprentice.php/passport/login.html'
         self.toBuy_url= 'http://hpg.sqk2.cn/public/apprentice.php/task/index.html'
         self.receive_btn_xpath = '//*[@id="operation"]/a[2]'
-        self.receiveButton = None
+        self.findedReceiveButton = False
         self.username = os.environ.get( 'HPG_USER' )  # 用户名
         self.password = os.environ.get( 'HPG_PASS' )  #
-
+        self.taskReceived = False
+        self.taskInfo = None
         self.driver = None
         self.debug = debug
 
@@ -85,10 +100,17 @@ class HPG(BASE,state.StateMachine):
         self.toBuy()
         try:
             normal_task = self.driver.find_element_by_id('normal-task')
-            normal_task.click()
-            time.sleep(1)
+            if normal_task.text == '我要买':
+                normal_task.click()
+                time.sleep(1)
+            elif normal_task.text == '停止':
+                pass
+
             activity_task = self.driver.find_element_by_id('activity-task')
-            activity_task.click()
+            if activity_task.text == '活动单':
+                activity_task.click()
+            elif activity_task.text == '停止':
+                pass
 
         except:
             print('没找到我要买按钮')
@@ -99,32 +121,63 @@ class HPG(BASE,state.StateMachine):
 
     @before('hpgInitWaitingTaskEvent')
     @before('hpgKeepWaitingTaskEvent')
-    def wait_task(self):
+    def checkTask(self):
         self.driver.refresh()
         time.sleep( 3 )
         try:
             self.receiveButton = self.driver.find_element_by_xpath(self.receive_btn_xpath)
+            print(self.receiveButton.text)
+            if self.receiveButton.text == '领取':
+                print('已接到任务，准备领取')
+                self.findedReceiveButton = True
+                self.taskReceived = False
+            else:
+                if self.receiveButton.text == '请先验证宝贝':
+                    self.taskReceived = True
+                    self.findedReceiveButton = False
+                    print('任务已领取')
         except:
             self.receiveButton = None
-            print('没找到领取按钮')
+            print(time.time(),'没找到领取按钮，继续等待接收任务')
+            time.sleep(10)
 
     @after('hpgInitWaitingTaskEvent')
     @after('hpgKeepWaitingTaskEvent')
-    def checkTask(self):
-        if self.receiveButton == None:
-            self.transition(self.hpgKeepWaitingTaskEvent,'hpgKeepWaitingTaskEvent')
+    @after( 'hpgReceiveTaskEvent' )
+    def checkTaskNextEvent(self):
+        if self.findedReceiveButton == True:
+            self.transition( self.hpgReceiveTaskEvent, 'hpgReceiveTaskEvent' )
+        elif self.taskReceived == True:
+            self.getTaskInfo()
+            print(self.taskInfo)
+            self.transition(self.hpgSubmitTaskEvent,'hpgSubmitTaskEvent')
         else:
-            self.transition(self.hpgReceiveTaskEvent, 'hpgReceiveTaskEvent')
+            self.transition(self.hpgKeepWaitingTaskEvent,'hpgKeepWaitingTaskEvent')
+
 
     @before('hpgReceiveTaskEvent')
     def receiveTask(self):
-        print('点击领取按钮')
-        self.receiveButton.click()
-        time.sleep(3)
+        #滑动页面
+        self.driver.execute_script( "window.scrollTo(0, document.body.scrollHeight);" )
 
-    @after('hpgReceiveTaskEvent')
-    def anotherEvent(self):
-        pass
+        print( '点击领取按钮' )
+        self.receiveButton.click( )
+        self.checkTask()
+
+    def getTaskInfo(self):
+        key_word = self.driver.find_element_by_id('target').get_attribute('value')
+        #print(key_word)
+        main_link = self.driver.find_element_by_class_name('main_link').get_attribute('src')
+        #print(main_link)
+        price = self.driver.find_element_by_class_name('customer_order').text
+        remarks_word = self.driver.find_element_by_class_name('remarks_word').text
+        #print(price,remarks_word)
+        self.taskInfo = {'keyword':key_word,
+                         'main_link':main_link,
+                         'price':price,
+                         'remarks_word':remarks_word,
+
+                         }
 
 if __name__ == '__main__':
     hpg = HPG(debug= True)

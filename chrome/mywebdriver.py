@@ -37,6 +37,7 @@ class myWebDriver(Chrome):
         self.file_detector = LocalFileDetector()
 
 
+
     def quit(self):
         """Quits the driver and close every associated window."""
         try:
