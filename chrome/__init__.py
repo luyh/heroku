@@ -47,7 +47,7 @@ class connectChrome(state.StateMachine):
             browser = mywebdriver.myWebDriver( service_url=params["server_url"],
                                                session_id=params["session_id"] )
             try:
-                browser.get( 'http://www.baidu.com' )
+                print(browser.title)
                 print( '已连上chrome:{}'.format( params ) )
                 self.driver = browser
                 self.connected = True
