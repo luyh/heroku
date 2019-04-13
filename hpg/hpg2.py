@@ -65,6 +65,13 @@ class HPG(BASE,Chrome):
                 time.sleep( 3 )
                 self.login()
 
+    def check_logout(self):
+        if self.driver.current_url in [self.user_url,self.task_url,self.submitted_url]:
+            return False
+        else:
+            self.login()
+            return True
+
     def queue_task(self):
         #print( '检查我要买' )
         if self.driver.current_url == self.task_url:
@@ -89,7 +96,7 @@ class HPG(BASE,Chrome):
         else:
             print('open:{}'.format(self.task_url))
             self.driver.get(self.task_url)
-            time.sleep(5)
+            time.sleep(3)
             self.queue_task()
 
     def receive_task(self):
@@ -128,6 +135,8 @@ class HPG(BASE,Chrome):
             self.driver.get(self.task_url)
             time.sleep(5)
             self.receive_task()
+
+
 
     def getTaskInfo(self):
         key_word = self.driver.find_element_by_xpath( '//*[@id="task-container"]/div[2]/div/input').get_attribute( 'value' )

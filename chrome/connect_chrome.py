@@ -25,7 +25,7 @@ class Refresh(threading.Thread):
         now = china_time.ChinaTime()
         while(1):
             threadLock.acquire()
-            #print(now.getChinaTime(),'刷新chrome')
+            print(now.getChinaTime(),'刷新chrome')
             self.driver.refresh()
             time.sleep(3)
             threadLock.release()

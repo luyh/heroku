@@ -8,25 +8,24 @@ from ulity import china_time
 
 hpg = HPG()
 machine = Machine( hpg, states=states,initial='initial' )
-
-
 ####
-machine.add_transition('connect_chrome','initial','chrome_connected',conditions='connectChrome')
-
-
+machine.add_transition('connect_chrome','initial','connectedChrome',conditions='connectChrome')
 
 #####
-machine.add_transition('Login', 'chrome', 'loginHPG',after='login')
+machine.add_transition('Login', 'connectedChrome', 'loginHPG',after='login')
 
-machine.add_transition('QuereTask','*','quereedTask',
+machine.add_transition('QuereTask',['loginHPG','quereedTask','receivedTask'],'quereedTask',
                        conditions='queue_task')
 
-machine.add_transition('ReceiveTask','*','receivedTask',
+machine.add_transition('ReceiveTask',['loginHPG','quereedTask','receivedTask'],'receivedTask',
                        conditions= 'receive_task')
+
+machine.add_transition('CheckLogOut','*','logoutHPG',
+                       conditions= 'check_logout')
 
 
 class ReceivingTaskThread(threading.Thread):
-    def __init__(self,hpg,delay = 30):
+    def __init__(self,hpg,delay = 20):
         threading.Thread.__init__(self)
         self.threadID = 'ReceivingTaskThread'
         self.delay = delay
@@ -56,6 +55,7 @@ class ReceivingTaskThread(threading.Thread):
 
             self.hpg.QuereTask()
             self.hpg.ReceiveTask()
+            self.hpg.CheckLogOut()
 
             threadLock.release()
 
