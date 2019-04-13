@@ -3,5 +3,8 @@ states = [ 'initial',
             'children':['initaial','newed', 'connected']
             },
             'loginHPG',
+            'quereedTask',
+            'receivedTask',
 
 ]
+

@@ -1,14 +1,37 @@
 from selenium import webdriver
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from chrome import mywebdriver
 from selenium.common.exceptions import WebDriverException
 import pickle
 import time,sys
 from transitions import Machine
+import threading
+from hpg import threadLock,threads
+from ulity import china_time
 
 # 打印系统系统
 systerm = sys.platform
 print( '系统类型:', systerm )
+
+
+
+class Refresh(threading.Thread):
+    def __init__(self,driver,delay = 30):
+        threading.Thread.__init__(self)
+        self.threadID = 'refreshChrome_thread'
+        self.delay = delay
+        self.driver = driver
+
+    def run(self):
+        now = china_time.ChinaTime()
+        while(1):
+            threadLock.acquire()
+            #print(now.getChinaTime(),'刷新chrome')
+            self.driver.refresh()
+            time.sleep(3)
+            threadLock.release()
+
+            time.sleep(self.delay)
+
 
 class Chrome():
     mobileEmulation = None
@@ -27,16 +50,16 @@ class Chrome():
             browser = mywebdriver.myWebDriver( service_url=params["server_url"],
                                                session_id=params["session_id"] )
             try:
-                print(browser.title)
+                browser.title
                 print( '已连上chrome参数为:{}'.format( params ) )
                 self.driver = browser
                 return True
-            except WebDriverException:
+            except :
                 print( 'chrome not reachable，连接chrome失败' )
                 return False
 
         except FileNotFoundError:
-            print('没找到：{}.data文件".format(self.name)')
+            print('没找到：{}.data文件'.format(self.name))
             return False
 
     def newChrome(self):
@@ -52,6 +75,7 @@ class Chrome():
                                       chrome_options=options)
         elif systerm.startswith('linux'):
             driver = webdriver.Chrome(chrome_options=options)
+
 
         elif systerm.startswith('win32'):
             driver = webdriver.Chrome(executable_path='C:/Users/Administrator/fast-retreat-53401/chrome/chromedriver.exe', chrome_options=options)
@@ -71,34 +95,9 @@ class Chrome():
         f.close()
         print('已保存chrome参数至{}.data' .format(self.name))
 
-
-if __name__ == '__main__':
-    states = ['initialChrome','NewedChrome','ConnectedChrome']
-
-    transitions = [
-        {'trigger': 'connect',
-         'source': 'initialChrome',
-         'dest': 'ConnectedChrome',
-         'conditions': 'connectChrome'
-         },
-
-        {'trigger': 'new',
-         'source': 'initialChrome',
-         'dest': 'NewedChrome',
-         'before':'newChrome'
-        },
-    ]
-
-    chrome = Chrome()
-
-    machine = Machine( chrome, states=states, transitions=transitions, initial='initialChrome' )
-
-    print(chrome.state)
-    chrome.connect()
-    print(chrome.state)
-    if chrome.state != 'ConnectedChrome':
-        chrome.new()
-        print( chrome.state )
-
+    def start_refresh_thread(self,delay = 30):
+        thread = Refresh(self.driver,delay)
+        print('Starting Refresh Chrome Thread')
+        thread.start()
 
 

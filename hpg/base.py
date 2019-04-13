@@ -30,7 +30,7 @@ class BASE(object):
 
     def toBuy(self):
         print( '切换到我要买页面' )
-        self._get( self.toBuy_url )
+        self._get( self.task_url )
         time.sleep(3)
 
     def queue_task(self):
@@ -43,7 +43,4 @@ class BASE(object):
         pass
 
     def status(self):
-        pass
-
-    def start_refresh_thread(self):
         pass
