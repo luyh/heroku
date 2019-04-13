@@ -56,11 +56,14 @@ class Chrome():
                 return True
             except :
                 print( 'chrome not reachable，连接chrome失败' )
-                return False
+                self.newChrome()
+
+                return True
 
         except FileNotFoundError:
             print('没找到：{}.data文件'.format(self.name))
-            return False
+            self.newChrome()
+            return True
 
     def newChrome(self):
         options = webdriver.ChromeOptions()
@@ -81,23 +84,25 @@ class Chrome():
             driver = webdriver.Chrome(executable_path='C:/Users/Administrator/fast-retreat-53401/chrome/chromedriver.exe', chrome_options=options)
         time.sleep(3)
 
-        print(u'已新建chrome浏览器，并成功连接')
+        #print(u'已新建chrome浏览器，并成功连接')
         self.driver = driver
 
         params = {}
         params["session_id"] = driver.session_id
         params["server_url"] = driver.command_executor._url
 
-        print('正在保存chrome参数至{}.data' .format(self.name))
+        #print('正在保存chrome参数至{}.data' .format(self.name))
         f = open( "{}.data".format(self.name), 'wb' )
         # 转储对象至文件
         pickle.dump( params, f )
         f.close()
-        print('已保存chrome参数至{}.data' .format(self.name))
+        #print('已保存chrome参数至{}.data' .format(self.name))
 
     def start_refresh_thread(self,delay = 30):
         thread = Refresh(self.driver,delay)
         print('Starting Refresh Chrome Thread')
         thread.start()
+
+        threads.append( thread )
 
 

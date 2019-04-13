@@ -5,7 +5,6 @@ states = [ 'initial',
             'loginHPG',
             'quereedTask',
             'receivedTask',
-            'waitSubmittTask',
 
 ]
 
