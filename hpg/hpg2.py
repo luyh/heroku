@@ -52,19 +52,6 @@ class HPG(BASE,Chrome):
         time.sleep( 2 )
         print( '已登陆HPG，完成初始化操作' )
 
-    def queue_task(self):
-        try:
-            normal_task = self.driver.find_element_by_id('normal-task')
-            if normal_task.text == '我要买':
-                normal_task.click()
-                time.sleep(1)
-
-            activity_task = self.driver.find_element_by_id('activity-task')
-            if activity_task.text == '活动单':
-                activity_task.click()
-                time.sleep(1)
-        except:
-            print('没找到我要买按钮')
 
     def checkTask(self):
         self.driver.refresh()
@@ -141,10 +128,15 @@ class HPG(BASE,Chrome):
             try:
                 normal_task = self.driver.find_element_by_id( 'normal-task' )
                 activity_task = self.driver.find_element_by_id( 'activity-task' )
-                if normal_task.text == '我要买' and activity_task.text == '活动单':
-                    print( normal_task.text, activity_task.text )
-                    return True
-                else:return False
+                if normal_task.text == '我要买':
+                    normal_task.click()
+                    time.sleep( 1 )
+
+                if activity_task.text == '活动单':
+                    activity_task.click()
+                    time.sleep( 1 )
+
+                return True
 
             except: return False
 
@@ -154,19 +146,46 @@ class HPG(BASE,Chrome):
             time.sleep(5)
             self.check_queue_task()
 
+
     def check_received_task(self):
-        try:
-            self.receiveButton = self.driver.find_element_by_xpath(self.receive_btn_xpath)
-            if self.receiveButton.text == '领取':
-                print('已接到任务，准备领取')
-                #self.driver.execute_script( "arguments[0].scrollIntoView(false);", self.receiveButton )
-                self.driver.execute_script( "window.scrollTo(0,document.body.scrollHeight)" )
-                self.receiveButton.click()
-                return True
-            else:return False
-        except:
-            print('没找到领取按钮，继续等待接收任务')
-            return False
+        print('检查领取状态')
+        if self.driver.current_url == self.task_url:
+            try:
+                self.receiveButton = self.driver.find_element_by_xpath(self.receive_btn_xpath)
+                if self.receiveButton.text == '领取':
+                    print('已接到任务，准备领取')
+                    #self.driver.execute_script( "arguments[0].scrollIntoView(false);", self.receiveButton )
+                    self.driver.execute_script( "window.scrollTo(0,document.body.scrollHeight)" )
+                    self.receiveButton.click()
+                    return True
+                else:return False
+            except:
+                print('没找到领取按钮，继续等待接收任务')
+                return False
+
+        else:
+            print('open:{}'.format(self.task_url))
+            self.driver.get(self.task_url)
+            time.sleep(5)
+            self.check_received_task()
+
+    def checkSubmittTask(self):
+        print('检查提交状态')
+        if self.driver.current_url == self.task_url:
+            try:
+                self.receiveButton = self.driver.find_element_by_xpath(self.receive_btn_xpath)
+                if self.receiveButton.text == '请先验证宝贝':
+                    print('已领取任务，快做单')
+                    return True
+                else:return False
+            except:
+                print('还没接到单，继续等待接收任务')
+                return False
+        else:
+            print('open:{}'.format(self.task_url))
+            self.driver.get(self.task_url)
+            time.sleep(5)
+            self.check_received_task()
 
 
 

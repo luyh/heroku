@@ -32,23 +32,24 @@ threadLock.release()
 
 ####
 machine.add_transition('Quere_normal_task','loginHPG','quereedTask',
-                       conditions='check_queued_task')
-
+                       conditions='check_queue_task')
 machine.add_transition('Quere_normal_task','loginHPG','quereedTask',
-                       conditions='check_queue_task',after='queue_task')
+                       conditions='check_queued_task')
+machine.add_transition('Quere_normal_task','loginHPG','receivedTask',
+                       conditions= 'check_received_task')
+machine.add_transition('Quere_normal_task','loginHPG','waitSubmittTask',
+                       conditions= 'checkSubmittTask')
 
+###
+machine.add_transition('ReceiveTask','quereedTask','receivedTask',
+                       conditions= 'check_received_task')
+machine.add_transition('ReceiveTask','quereedTask','quereedTask',
+                       unless= 'check_received_task')
 
 threadLock.acquire()
 hpg.Quere_normal_task()
 threadLock.release()
 print( hpg.state )
-
-###
-machine.add_transition('ReceiveTask',['loginHPG','quereedTask'],'receivedTask',
-                       conditions= 'check_received_task')
-machine.add_transition('ReceiveTask','quereedTask','quereedTask',
-                       unless= 'check_received_task')
-
 
 class ReceivingTaskThread(threading.Thread):
     def __init__(self,hpg,delay = 20):
@@ -72,8 +73,6 @@ class ReceivingTaskThread(threading.Thread):
 
 receivingTaskThread = ReceivingTaskThread(hpg)
 receivingTaskThread.start()
-
-
 
 
 print('End')
