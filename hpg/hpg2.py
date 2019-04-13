@@ -159,7 +159,8 @@ class HPG(BASE,Chrome):
             self.receiveButton = self.driver.find_element_by_xpath(self.receive_btn_xpath)
             if self.receiveButton.text == '领取':
                 print('已接到任务，准备领取')
-                
+                #self.driver.execute_script( "arguments[0].scrollIntoView(false);", self.receiveButton )
+                self.driver.execute_script( "window.scrollTo(0,document.body.scrollHeight)" )
                 self.receiveButton.click()
                 return True
             else:return False
