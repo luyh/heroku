@@ -3,7 +3,6 @@ states = [ 'initial',
             'loginHPG',
             'quereedTask',
             'receivedTask',
-           'logoutHPG'
 
 ]
 

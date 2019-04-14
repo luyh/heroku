@@ -20,12 +20,12 @@ machine.add_transition('QuereTask',['loginHPG','quereedTask','receivedTask'],'qu
 machine.add_transition('ReceiveTask',['loginHPG','quereedTask','receivedTask'],'receivedTask',
                        conditions= 'receive_task')
 
-machine.add_transition('CheckLogOut','*','logoutHPG',
+machine.add_transition('CheckLogOut','*','loginHPG',
                        conditions= 'check_logout')
 
 
 class ReceivingTaskThread(threading.Thread):
-    def __init__(self,hpg,delay = 20):
+    def __init__(self,hpg,delay = 10):
         threading.Thread.__init__(self)
         self.threadID = 'ReceivingTaskThread'
         self.delay = delay
@@ -52,13 +52,11 @@ class ReceivingTaskThread(threading.Thread):
             print(now.getChinaTime(), hpg.state )
 
             threadLock.acquire()
-
+            self.hpg.CheckLogOut()
             self.hpg.QuereTask()
             self.hpg.ReceiveTask()
-            self.hpg.CheckLogOut()
 
             threadLock.release()
-
 
             time.sleep(self.delay)
 
