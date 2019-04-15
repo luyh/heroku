@@ -2,9 +2,11 @@ from hpg2 import HPG
 from transitions.extensions import HierarchicalMachine as Machine
 from states import states
 import time
-from hpg import threadLock,threads
 import threading
 from ulity import china_time
+
+threadLock = threading.Lock()
+threads = []
 
 hpg = HPG()
 machine = Machine( hpg, states=states,initial='initial' )

@@ -1,11 +1,8 @@
 from selenium import webdriver
 from chrome import mywebdriver
-from selenium.common.exceptions import WebDriverException
 import pickle
 import time,sys
-from transitions import Machine
 import threading
-from hpg import threadLock,threads
 from ulity import china_time
 
 # 打印系统系统
@@ -103,6 +100,5 @@ class Chrome():
         print('Starting Refresh Chrome Thread')
         thread.start()
 
-        threads.append( thread )
 
 

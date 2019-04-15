@@ -1,5 +1,5 @@
-import sys
-sys.path.append('..')
+# import sys
+# sys.path.append('..')
 
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import TimeoutException
@@ -9,6 +9,12 @@ from base import BASE
 from chrome.connect_chrome import Chrome
 from ulity import china_time,send_wechat,send_email
 import os,time
+
+import threading
+
+threadLock = threading.Lock()
+threads = []
+
 
 class HPG(BASE,Chrome):
     def __init__(self,name = 'hpg',debug = False,mobileEmulation = None):
@@ -110,7 +116,7 @@ class HPG(BASE,Chrome):
                     if self.taskInfoFlag:
                         self.getTaskInfo()
                         print( self.taskInfo )
-                        send_wechat( '接到hpg任务', self.taskInfo )
+                        send_wechat.send_wechat( '接到hpg任务', self.taskInfo )
                         self.taskInfoFlag = False
 
                     return True
