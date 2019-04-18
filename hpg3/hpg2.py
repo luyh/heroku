@@ -1,6 +1,6 @@
-from .base import BASE
-from .chrome.connect_chrome import Chrome
-from .ulity import china_time,send_email
+from base import BASE
+from chrome.connect_chrome import Chrome
+from ulity import china_time,send_email
 import os,time
 
 import threading
