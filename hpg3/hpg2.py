@@ -1,13 +1,6 @@
-# import sys
-# sys.path.append('..')
-
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.common.exceptions import TimeoutException
-
-from base import BASE
-
-from chrome.connect_chrome import Chrome
-from ulity import china_time,send_email
+from .base import BASE
+from .chrome.connect_chrome import Chrome
+from .ulity import china_time,send_email
 import os,time
 
 import threading
@@ -115,13 +108,6 @@ class HPG(BASE,Chrome):
                 self.receiveButton = self.driver.find_element_by_xpath(self.receive_btn_xpath)
 
                 if self.receiveButton.text == '请先验证宝贝':
-                    print( '已领取任务，快做单' )
-                    if self.taskInfoFlag:
-                        self.getTaskInfo()
-                        print( self.taskInfo )
-                        send_email.send_email ( '接到hpg任务', self.taskInfo )
-                        self.taskInfoFlag = False
-
                     return True
 
                 elif self.receiveButton.text == '领取':
@@ -130,9 +116,13 @@ class HPG(BASE,Chrome):
                     self.driver.execute_script( "window.scrollTo(0,document.body.scrollHeight)" )
                     self.receiveButton.click()
 
+                    print( '已领取任务，快做单' )
+                    self.getTaskInfo()
+                    print( self.taskInfo )
+                    send_email.send_email( '接到hpg任务', self.taskInfo )
+
                     time.sleep(3)
 
-                    self.taskInfoFlag = True
                     self.receive_task()
 
             except:

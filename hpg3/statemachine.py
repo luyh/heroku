@@ -39,9 +39,8 @@ now = china_time.ChinaTime()
 
 while(1):
     hpg.CheckLogin()
-    if hpg.is_loginHPG():
-        hpg.QuereTask()
-        hpg.ReceiveTask()
+    hpg.QuereTask()
+    hpg.ReceiveTask()
 
     if hpg.state != old_state:
         print(now.getChinaTime(), hpg.state )
