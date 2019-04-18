@@ -34,25 +34,21 @@ print(hpg.state)
 old_state = hpg.state
 
 hpg.connect_chrome()
-time.sleep(2)
-hpg.driver.refresh()
-time.sleep(3)
 
 now = china_time.ChinaTime()
 
 while(1):
-    if hpg.state != old_state:
-        print(now.getChinaTime(), hpg.state )
-
     hpg.CheckLogin()
     if hpg.is_loginHPG():
         hpg.QuereTask()
         hpg.ReceiveTask()
 
+    if hpg.state != old_state:
+        print(now.getChinaTime(), hpg.state )
 
     old_state = hpg.state
-    time.sleep(30)
     hpg.driver.refresh()
+    time.sleep( 15 )
 
 class ReceivingTaskThread(threading.Thread):
     def __init__(self,hpg,delay = 10):

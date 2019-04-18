@@ -45,6 +45,8 @@ class HPG(BASE,Chrome):
 
     def login(self):
         if self.driver.current_url in self.login_url:
+            self.driver.refresh()
+            time.sleep( 5 )
             try:
                 # 输入用户名及密码
                 username_element = self.driver.find_element_by_id( self.username_id )
@@ -63,8 +65,6 @@ class HPG(BASE,Chrome):
                 return True
             except:
                 print(self.now.getChinaTime(),'登陆失败')
-                self.driver.refresh()
-                time.sleep(5)
                 return False
 
         else:
@@ -95,6 +95,7 @@ class HPG(BASE,Chrome):
                     time.sleep( 1 )
                     activity_task.click()
                     time.sleep( 1 )
+                    print(self.now.getChinaTime(),'已订阅任务')
                     return True
 
                 else:return False
