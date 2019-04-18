@@ -93,7 +93,8 @@ class HPG(BASE,Chrome):
 
                 else:return False
 
-            except: return False
+            except:
+                return False
 
         else:
             print('open:{}'.format(self.task_url))
@@ -111,14 +112,18 @@ class HPG(BASE,Chrome):
                     return True
 
                 elif self.receiveButton.text == '领取':
-                    print('已接到任务，准备领取')
                     #self.driver.execute_script( "arguments[0].scrollIntoView(false);", self.receiveButton )
                     self.driver.execute_script( "window.scrollTo(0,document.body.scrollHeight)" )
                     self.receiveButton.click()
+                    time.sleep(1)
+
+                    self.driver.refresh()
+                    time.sleep(5)
 
                     print( '已领取任务，快做单' )
                     self.getTaskInfo()
-                    print( self.taskInfo )
+                    print( '任务详情：',self.taskInfo )
+                    send_email.send_email( '接到hpg任务', self.now.getChinaTime() )
                     send_email.send_email( '接到hpg任务', self.taskInfo )
 
                     time.sleep(3)

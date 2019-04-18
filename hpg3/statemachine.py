@@ -3,7 +3,7 @@ from transitions.extensions import HierarchicalMachine as Machine
 from states import states
 import time
 import threading
-from ulity import china_time
+from ulity import china_time,send_email
 
 
 # # Set up logging; The basic log level will be DEBUG
@@ -36,6 +36,8 @@ old_state = hpg.state
 hpg.connect_chrome()
 
 now = china_time.ChinaTime()
+
+send_email.send_email( '接到hpg任务', hpg.now.getChinaTime() )
 
 while(1):
     hpg.CheckLogin()
