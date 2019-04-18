@@ -5,7 +5,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.header import Header
 import os
-from ulity.china_time import ChinaTime
+from .china_time import ChinaTime
 import markdown
 
 def send_email(title="fast-retreat-53401.herokuapp", \

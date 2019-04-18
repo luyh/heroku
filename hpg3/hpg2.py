@@ -7,7 +7,7 @@ from selenium.common.exceptions import TimeoutException
 from base import BASE
 
 from chrome.connect_chrome import Chrome
-from ulity import china_time,send_wechat,send_email
+from ulity import china_time,send_email
 import os,time
 
 import threading
@@ -41,42 +41,44 @@ class HPG(BASE,Chrome):
         self.taskInfo = None
         self.taskInfoFlag = False
 
+        self.now = china_time.ChinaTime()
+
     def login(self):
-        if self.driver.current_url in [self.user_url,self.task_url,self.submitted_url]:
-            return True
+        if self.driver.current_url in self.login_url:
+            try:
+                # 输入用户名及密码
+                username_element = self.driver.find_element_by_id( self.username_id )
+                username_element.clear()
+                username_element.send_keys( self.username )
+
+                password_element = self.driver.find_element_by_id( self.password_id )
+                password_element.clear()
+                password_element.send_keys( self.password )
+
+                login_element = self.driver.find_element_by_id( self.login_button_id )
+                login_element.click()
+                time.sleep( 2 )
+                print( '已登陆HPG，完成初始化操作' )
+
+                return True
+            except:
+                print(self.now.getChinaTime(),'登陆失败')
+                self.driver.refresh()
+                time.sleep(5)
+                return False
+
         else:
-            if self.driver.current_url in self.login_url:
-                try:
-                    # 输入用户名及密码
-                    username_element = self.driver.find_element_by_id( self.username_id )
-                    username_element.clear()
-                    username_element.send_keys( self.username )
-
-                    password_element = self.driver.find_element_by_id( self.password_id )
-                    password_element.clear()
-                    password_element.send_keys( self.password )
-
-                    login_element = self.driver.find_element_by_id( self.login_button_id )
-                    login_element.click()
-                    time.sleep( 2 )
-                    print( '已登陆HPG，完成初始化操作' )
-
-                    return True
-                except:
-                    return False
-
-            else:
-                print( '登陆hpg：{}'.format( self.login_url ) )
-                self.driver.get(self.login_url)
-                time.sleep( 3 )
-                self.login()
-
-    def check_logout(self):
-        if self.driver.current_url in [self.user_url,self.task_url,self.submitted_url]:
-            return False
-        else:
+            print( '登陆hpg：{}'.format( self.login_url ) )
+            self.driver.get(self.login_url)
+            time.sleep( 3 )
             self.login()
+
+    def check_login(self):
+        if self.driver.current_url in [self.user_url,self.task_url,self.submitted_url]:
             return True
+        else:
+            if self.login():
+                return True
 
     def queue_task(self):
         #print( '检查我要买' )
@@ -116,7 +118,7 @@ class HPG(BASE,Chrome):
                     if self.taskInfoFlag:
                         self.getTaskInfo()
                         print( self.taskInfo )
-                        send_wechat.send_wechat( '接到hpg任务', self.taskInfo )
+                        send_email.send_email ( '接到hpg任务', self.taskInfo )
                         self.taskInfoFlag = False
 
                     return True

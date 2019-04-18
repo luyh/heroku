@@ -5,6 +5,13 @@ import time
 import threading
 from ulity import china_time
 
+
+# # Set up logging; The basic log level will be DEBUG
+# import logging
+# logging.basicConfig(level=logging.DEBUG)
+# # Set transitions' log level to INFO; DEBUG messages will be omitted
+# logging.getLogger('transitions').setLevel(logging.INFO)
+
 threadLock = threading.Lock()
 threads = []
 
@@ -14,7 +21,8 @@ machine = Machine( hpg, states=states,initial='initial' )
 machine.add_transition('connect_chrome','initial','connectedChrome',conditions='connectChrome')
 
 #####
-machine.add_transition('Login', 'connectedChrome', 'loginHPG',after='login')
+machine.add_transition('CheckLogin','*','loginHPG',
+                       conditions= 'check_login')
 
 machine.add_transition('QuereTask',['loginHPG','quereedTask','receivedTask'],'quereedTask',
                        conditions='queue_task')
@@ -22,9 +30,29 @@ machine.add_transition('QuereTask',['loginHPG','quereedTask','receivedTask'],'qu
 machine.add_transition('ReceiveTask',['loginHPG','quereedTask','receivedTask'],'receivedTask',
                        conditions= 'receive_task')
 
-machine.add_transition('CheckLogOut','*','loginHPG',
-                       conditions= 'check_logout')
+print(hpg.state)
+old_state = hpg.state
 
+hpg.connect_chrome()
+time.sleep(2)
+hpg.driver.refresh()
+time.sleep(3)
+
+now = china_time.ChinaTime()
+
+while(1):
+    if hpg.state != old_state:
+        print(now.getChinaTime(), hpg.state )
+
+    hpg.CheckLogin()
+    if hpg.is_loginHPG():
+        hpg.QuereTask()
+        hpg.ReceiveTask()
+
+
+    old_state = hpg.state
+    time.sleep(30)
+    hpg.driver.refresh()
 
 class ReceivingTaskThread(threading.Thread):
     def __init__(self,hpg,delay = 10):
@@ -49,9 +77,11 @@ class ReceivingTaskThread(threading.Thread):
 
     def run(self):
         now = china_time.ChinaTime()
+        old_state = hpg.state
 
         while(1):
-            print(now.getChinaTime(), hpg.state )
+            if hpg.state != old_state:
+                print(now.getChinaTime(), hpg.state )
 
             threadLock.acquire()
             self.hpg.CheckLogOut()
@@ -60,9 +90,10 @@ class ReceivingTaskThread(threading.Thread):
 
             threadLock.release()
 
+            old_state = hpg.state
             time.sleep(self.delay)
 
-receivingTaskThread = ReceivingTaskThread(hpg)
-receivingTaskThread.start()
+# receivingTaskThread = ReceivingTaskThread(hpg)
+# receivingTaskThread.start()
 
 print('End')
