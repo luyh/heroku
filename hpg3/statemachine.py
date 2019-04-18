@@ -24,10 +24,10 @@ machine.add_transition('connect_chrome','initial','connectedChrome',conditions='
 machine.add_transition('CheckLogin','*','loginHPG',
                        conditions= 'check_login')
 
-machine.add_transition('QuereTask',['loginHPG','quereedTask','receivedTask'],'quereedTask',
+machine.add_transition('QuereTask','*','quereedTask',
                        conditions='queue_task')
 
-machine.add_transition('ReceiveTask',['loginHPG','quereedTask','receivedTask'],'receivedTask',
+machine.add_transition('ReceiveTask','*','receivedTask',
                        conditions= 'receive_task')
 
 print(hpg.state)
