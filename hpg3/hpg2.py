@@ -124,7 +124,7 @@ class HPG(BASE,Chrome):
                     self.getTaskInfo()
                     print( '任务详情：',self.taskInfo )
                     send_email.send_email( '接到hpg任务', self.now.getChinaTime() )
-                    send_email.send_email( '接到hpg任务', self.taskInfo )
+                    send_email.send_email( '接到hpg任务', str(self.taskInfo ))
 
                     time.sleep(3)
 
